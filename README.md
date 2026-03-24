@@ -72,7 +72,7 @@
                 ┌───────────────┴───────────────┐
                 ▼                               ▼
 ┌───────────────────────────┐   ┌───────────────────────────┐
-│      FSGS 重建路径          │   │      EAP-GS 重建路径        │
+│      FSGS 重建路径          │   │      EAP-GS 重建路径      │
 │  (随机初始化点云)           │   │  (COLMAP + ZoeDepth)      │
 │                           │   │                           │
 │  - data_convert.py        │   │  - blender_to_colmap.py   │
@@ -83,18 +83,18 @@
                 └───────────────┬───────────────┘
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                 Step 3-4: 渲染 + 图像增强                         │
-│  - render_enhance(): Gamma(0.82), Brightness(0.12),            │
-│                      Contrast(1.4), Saturation(1.40)           │
+│                 Step 3-4: 渲染 + 图像增强                        │
+│  - render_enhance(): Gamma(0.82), Brightness(0.12),             │
+│                      Contrast(1.4), Saturation(1.40)            │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                   Step 5: 直方图匹配 (Histogram Matching)         │
-│  - histogram_match/main.py                                       │
+│                   Step 5: 直方图匹配 (Histogram Matching)        │
+│  - histogram_match/main.py                                      │
 │  - 计算原图亮度统计 (mean/std)                                    │
 │  - 将渲染图亮度分布拉到与原图一致                                  │
-│  - 保护高光/暗部区域避免过曝或死黑                                  │
+│  - 保护高光/暗部区域避免过曝或死黑                                 │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
@@ -241,9 +241,14 @@ python blender_to_colmap.py \
     --output-dir EAP-GS/dataset_eap/SceneName/sparse/0 \
     --split-subdirs
 
-# Step 2: COLMAP 重建 (可选，使用已有结果可跳过)
+# Step 2: SfM
+# Step 2.1: 使用COLMAP 重建 (可选，使用已有结果可跳过)
 cd EAP-GS
 python run_colmap.py --source_path dataset_eap/SceneName --camera PINHOLE
+
+# Step 2.2: 使用VGGT 重建 (可选，需安装vggt)
+python convert/vggt_nocol/depth.py
+python convert/vggt_nocol/voxelize.py
 
 # Step 3: 训练
 python train.py \
@@ -264,18 +269,29 @@ python render.py \
     --iteration 30000
 ```
 
-### 直方图匹配
+### 后处理
 
+提供两种后处理方法，
+
+**方法1**
+依据validation中BlueHawaii场景，对渲染结果的亮度进行调整
 ```bash
 cd histogram_match
 
-# 准备原图目录 (real_images/) 和渲染结果目录 (final/)
+# 准备原图目录 (real_image/) 和渲染结果目录 (final/)
 # 运行直方图匹配
 python main.py
 
 # 参数调整 (在 main.py 中修改)
 MATCH_STRENGTH = 1.0  # 1.0 = 完全套用目标亮度统计
 ```
+
+**方法2**
+参照渲染结果中色卡颜色，调整亮度、gamma、对比度等参数
+```bash
+python /convert/relight_yrestrict.py
+```
+
 
 ---
 
@@ -330,6 +346,7 @@ for pid in range(1, 100000):
 | [EAP-GS](https://github.com/your-eapgs-repo) | (请参考原项目) | 深度感知 Gaussian Splatting |
 | [RetinexFormer](https://github.com/Guo砚砚/RetinexFormer) | (请参考原项目) | 低光照图像增强 |
 | [ZoeDepth](https://github.com/isl-org/ZoeDepth) | (请参考原项目) | 单目深度估计 |
+| [VGGT](https://github.com/facebookresearch/vggt) | (请参考原项目) | 深度估计、稀疏点云生成 |
 
 ### 子模块
 
@@ -385,3 +402,4 @@ for pid in range(1, 100000):
 - [DreamGaussian](https://github.com/ashawkey/diff-gaussian-rasterization)
 - [RetinexFormer](https://github.com/Guo砚砚/RetinexFormer)
 - [ZoeDepth](https://github.com/isl-org/ZoeDepth)
+- [VGGT](https://github.com/facebookresearch/vggt)
