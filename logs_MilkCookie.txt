@@ -1,0 +1,16 @@
+Using cache found in /home/liuyuhao/.cache/torch/hub/intel-isl_MiDaS_master
+/home/liuyuhao/anaconda3/envs/FSGS/lib/python3.8/site-packages/timm/models/_factory.py:117: UserWarning: Mapping deprecated model name vit_base_resnet50_384 to current vit_base_r50_s16_384.orig_in21k_ft_in1k.
+  model = create_fn(
+Using cache found in /home/liuyuhao/.cache/torch/hub/intel-isl_MiDaS_master
+[1000, 3000, 5000, 10000, 20000, 30000, 40000, 50000, 60000]
+Optimizing output2/milkcookie
+Output folder: output2/milkcookie [20/03 23:45:18]
+Tensorboard not available: not logging progress [20/03 23:45:18]
+Traceback (most recent call last):
+  File "train.py", line 279, in <module>
+    training(lp.extract(args), op.extract(args), pp.extract(args), args)
+  File "train.py", line 44, in training
+    scene = Scene(args, gaussians, shuffle=False)
+  File "/home/liuyuhao/FSGS/scene/__init__.py", line 53, in __init__
+    assert False, "Could not recognize scene type!"
+AssertionError: Could not recognize scene type!
