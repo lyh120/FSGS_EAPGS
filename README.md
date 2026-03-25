@@ -180,12 +180,12 @@ FSGS_EAPGS/
 conda env create --file environment.yml
 conda activate FSGS
 
-# 安装子模块 (已在仓库中)
+# 安装子模块 
 # submodules/simple-knn
 # submodules/diff-gaussian-rasterization
 ```
 
-> **注意**: CUDA 11.7 是推荐的版本。
+> **注意**: CUDA 11.7 是推荐的版本。相关具体环境安装指南请参考项目基于的其他项目指南。
 
 ### 数据准备
 
@@ -214,12 +214,10 @@ dataset_v2/
 
 ```bash
 # 随机初始化点云 + 训练
-python data_convert.py --scene SceneName
-
 # 训练
 python train.py \
-    --source_path dataset_colmap/SceneName \
-    --model_path output/SceneName \
+    --source_path dataset_v2/SceneName \
+    --model_path output_v2/SceneName \
     --n_views 0 \
     --eval \
     --resolution 1 \
@@ -227,12 +225,16 @@ python train.py \
     --test_iterations 1000 2000 5000 10000 20000 30000 \
     --save_iterations 10000 20000 30000 \
     --checkpoint_iterations 10000 20000 30000
+# 渲染
+python render.py --model_path output_v2/SceneName --iteration 60000 --resolution 1
+# 结果
+dataset_v2包含了训练数据，output_v2包含了训练好的模型权重。
 ```
 
 ### EAP-GS 训练
 
 ```bash
-# Step 1: Blender → COLMAP 格式转换
+# Step 1: Blender → COLMAP 格式转换以及COLMAP 重建，批量运行脚本已经写好在start.sh中了，可以查看bash指令运行。
 python blender_to_colmap.py \
     --train-json dataset_v2/SceneName/transforms_train.json \
     --test-json dataset_v2/SceneName/transforms_test.json \
@@ -281,13 +283,14 @@ cd histogram_match
 # 准备原图目录 (real_image/) 和渲染结果目录 (final/)
 # 运行直方图匹配
 python main.py
+python main_color.py
 
 # 参数调整 (在 main.py 中修改)
 MATCH_STRENGTH = 1.0  # 1.0 = 完全套用目标亮度统计
 ```
 
 **方法2**
-参照渲染结果中色卡颜色，调整亮度、gamma、对比度等参数
+参照渲染结果中色卡颜色，调整亮度、gamma、对比度等参数，这部分以及通过函数形式写入渲染过程中了，默认启用。
 ```bash
 python /convert/relight_yrestrict.py
 ```
