@@ -266,7 +266,7 @@ python train.py \
 ### 渲染
 
 ```bash
-# FSGS 渲染
+# FSGS 渲染，由于权重文件实在太大，这里面只先传了chocolate的权重在output_v2中
 python render.py \
     --source_path dataset_colmap/SceneName \
     --model_path output/SceneName \
